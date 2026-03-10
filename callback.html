@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pre-Save Complete</title>
+</head>
+<body>
+  <h1>Connecting to Spotify...</h1>
+  <script>
+    // Get access token from URL
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const token = params.get("access_token");
+
+    if (token) {
+        const albumId = "1DcxHW214MCDxXju71RbvX"; // Spotify ARIRANG Album ID
+
+        // Save album to user library
+        fetch(`https://api.spotify.com/v1/me/albums?ids=${albumId}`, {
+            method: "PUT",
+            headers: {
+                Authorization: "Bearer " + token
+            }
+        })
+        .then(() => {
+            // Redirect back to main site after presave
+            window.location.href = "index.html?done=true";
+        })
+        .catch(() => {
+            document.body.innerHTML = "Something went wrong. Try again!";
+        });
+    } else {
+        document.body.innerHTML = "No access token found. Try logging in again!";
+    }
+  </script>
+</body>
+</html>
